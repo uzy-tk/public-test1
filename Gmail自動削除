@@ -1,0 +1,104 @@
+// Initialize the Script
+function StartProgram() {
+
+  var AUTODELETELABEL180 = "delete_after_180days";
+
+  if ( ! GmailApp.getUserLabelByName(AUTODELETELABEL180) ) {
+    GmailApp.createLabel(AUTODELETELABEL180);
+  }
+
+  var AUTODELETELABEL30 = "delete_after_30days";
+
+  if ( ! GmailApp.getUserLabelByName(AUTODELETELABEL30) ) {
+    GmailApp.createLabel(AUTODELETELABEL30);
+  }
+
+  var AUTODELETELABEL = "delete_manually";
+
+  if ( ! GmailApp.getUserLabelByName(AUTODELETELABEL) ) {
+    GmailApp.createLabel(AUTODELETELABEL);
+  }
+    
+  createTrigger();
+
+}
+
+// The script will check your Gmail mailbox every minute
+// with the help of a CLOCK based trigger.
+function createTrigger() {
+
+  var triggers = ScriptApp.getScriptTriggers();
+
+  for(var i in triggers) {
+    ScriptApp.deleteTrigger(triggers[i]);
+  }
+
+  ScriptApp.newTrigger('gmailautodelete')
+   .timeBased()
+   .everyMinutes(5)
+   .create();   
+
+}
+
+
+function gmailautodelete() {
+  var day30 = 30;
+  var label30 = 'delete_after_30days';
+  var threads30 = GmailApp.search('older_than:' + day30 + 'd label:' + label30 , 0 , 100);
+  var Messages30 = GmailApp.getMessagesForThreads(threads30);
+
+  Logger.log(threads30.length);
+  if( threads30.length == null) {
+    return;
+  }
+
+  for(var i in Messages30){
+    for(var j in Messages30[i]){
+      if(Messages30[i][j].isStarred()){
+        Logger.log(Messages30[i][j].getId());
+        Gmail.Users.Messages.remove("me",Messages30[i][j].getId());
+//        Messages30[i][j].moveToTrash();
+      }
+    }
+  }  
+  
+    
+  var day180 = 180;
+  var label180 = 'delete_after_180days';
+  var threads180 = GmailApp.search('older_than:' + day180 + 'd label:' + label180 , 0 , 100);
+  var Messages180 = GmailApp.getMessagesForThreads(threads180);
+
+  Logger.log(threads180.length);
+  if( threads180.length == null) {
+    return;
+  }
+
+  for(var i in Messages180){
+    for(var j in Messages180[i]){
+      if(Messages180[i][j].isStarred()){
+        Logger.log(Messages180[i][j].getId());
+        Gmail.Users.Messages.remove("me",Messages180[i][j].getId());
+//        Messages180[i][j].moveToTrash();
+      }
+    }
+  }  
+
+  var labelmanually = 'delete_manually';
+  var threads1manually = GmailApp.search('label:' + labelmanually , 0 , 100);
+  var Messagesmanually = GmailApp.getMessagesForThreads(threads1manually);
+
+  Logger.log(threads1manually.length);
+  if( threads1manually.length == null) {
+    return;
+  }
+
+  for(var i in Messagesmanually){
+    for(var j in Messagesmanually[i]){
+      if(Messagesmanually[i][j].isStarred()){
+        Logger.log(Messagesmanually[i][j].getId());
+        Gmail.Users.Messages.remove("me",Messagesmanually[i][j].getId());
+//        Messagesmanually[i][j].moveToTrash();
+      }
+    }
+  }  
+}
